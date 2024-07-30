@@ -1,9 +1,11 @@
 package makeo.gadomancy.client;
 
 import java.util.ArrayDeque;
-import java.util.List;
 import java.util.Queue;
+import java.util.List;
 
+import makeo.gadomancy.client.renderers.tile.*;
+import makeo.gadomancy.common.blocks.tiles.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.resources.IResourceManager;
@@ -42,40 +44,8 @@ import makeo.gadomancy.client.renderers.item.ItemRenderStoneMachine;
 import makeo.gadomancy.client.renderers.item.ItemRenderTEKnowledgeBook;
 import makeo.gadomancy.client.renderers.item.ItemRenderTileEntity;
 import makeo.gadomancy.client.renderers.item.ItemRenderTileEntityMulti;
-import makeo.gadomancy.client.renderers.tile.RenderTileArcaneDropper;
-import makeo.gadomancy.client.renderers.tile.RenderTileArcanePackager;
-import makeo.gadomancy.client.renderers.tile.RenderTileAuraPylon;
-import makeo.gadomancy.client.renderers.tile.RenderTileBlockProtector;
-import makeo.gadomancy.client.renderers.tile.RenderTileCapEldritch;
-import makeo.gadomancy.client.renderers.tile.RenderTileEssentiaCompressor;
-import makeo.gadomancy.client.renderers.tile.RenderTileExtendedNode;
-import makeo.gadomancy.client.renderers.tile.RenderTileExtendedNodeJar;
-import makeo.gadomancy.client.renderers.tile.RenderTileInfusionClaw;
-import makeo.gadomancy.client.renderers.tile.RenderTileKnowledgeBook;
-import makeo.gadomancy.client.renderers.tile.RenderTileManipulationFocus;
-import makeo.gadomancy.client.renderers.tile.RenderTileManipulatorPillar;
-import makeo.gadomancy.client.renderers.tile.RenderTileNodeManipulator;
-import makeo.gadomancy.client.renderers.tile.RenderTileObelisk;
-import makeo.gadomancy.client.renderers.tile.RenderTileRemoteJar;
-import makeo.gadomancy.client.renderers.tile.RenderTileStickyJar;
 import makeo.gadomancy.client.util.MultiTickEffectDispatcher;
 import makeo.gadomancy.common.CommonProxy;
-import makeo.gadomancy.common.blocks.tiles.TileAdditionalEldritchPortal;
-import makeo.gadomancy.common.blocks.tiles.TileArcaneDropper;
-import makeo.gadomancy.common.blocks.tiles.TileArcanePackager;
-import makeo.gadomancy.common.blocks.tiles.TileAuraPylon;
-import makeo.gadomancy.common.blocks.tiles.TileAuraPylonTop;
-import makeo.gadomancy.common.blocks.tiles.TileBlockProtector;
-import makeo.gadomancy.common.blocks.tiles.TileEssentiaCompressor;
-import makeo.gadomancy.common.blocks.tiles.TileExtendedNode;
-import makeo.gadomancy.common.blocks.tiles.TileExtendedNodeJar;
-import makeo.gadomancy.common.blocks.tiles.TileInfusionClaw;
-import makeo.gadomancy.common.blocks.tiles.TileKnowledgeBook;
-import makeo.gadomancy.common.blocks.tiles.TileManipulationFocus;
-import makeo.gadomancy.common.blocks.tiles.TileManipulatorPillar;
-import makeo.gadomancy.common.blocks.tiles.TileNodeManipulator;
-import makeo.gadomancy.common.blocks.tiles.TileRemoteJar;
-import makeo.gadomancy.common.blocks.tiles.TileStickyJar;
 import makeo.gadomancy.common.entities.EntityAuraCore;
 import makeo.gadomancy.common.entities.EntityPermNoClipItem;
 import makeo.gadomancy.common.registration.RegisteredBlocks;
@@ -146,6 +116,8 @@ public class ClientProxy extends CommonProxy {
                 new RenderTileCapEldritch("textures/models/obelisk_cap.png"));
         RenderTileEssentiaCompressor renderTileEssentiaCompressor = new RenderTileEssentiaCompressor();
         ClientRegistry.bindTileEntitySpecialRenderer(TileEssentiaCompressor.class, renderTileEssentiaCompressor);
+        RenderTileEssentiaVoidCompressor renderTileEssentiaVoidCompressor = new RenderTileEssentiaVoidCompressor();
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEssentiaVoidCompressor.class, renderTileEssentiaVoidCompressor);
 
         // ClientRegistry.bindTileEntitySpecialRenderer(TileAIShutdown.class, new RenderTileAIShutdown());
 
@@ -178,6 +150,12 @@ public class ClientProxy extends CommonProxy {
                 new ItemRenderTileEntity<TileEssentiaCompressor>(
                         renderTileEssentiaCompressor,
                         new TileEssentiaCompressor()));
+
+        MinecraftForgeClient.registerItemRenderer(
+            Item.getItemFromBlock(RegisteredBlocks.blockEssentiaVoidCompressor),
+            new ItemRenderTileEntity<TileEssentiaVoidCompressor>(
+                renderTileEssentiaVoidCompressor,
+                new TileEssentiaVoidCompressor()));
 
         MinecraftForgeClient
                 .registerItemRenderer(Item.getItemFromBlock(ConfigBlocks.blockAiry), new ItemExNodeRenderer());

@@ -221,6 +221,7 @@ tile.BlockAuraPylon.0.name=Аура-пилон
 tile.BlockAuraPylon.1.name=Шпиль Аура-пилона
 tile.BlockKnowledgeBook.name=Книга Mudрости
 tile.BlockEssentiaCompressor.name=Конденсатор эссенции
+tile.BlockEssentiaVoidCompressor.name=Пустотный Конденсатор эссенции
 
 gadomancy.nodes.GROWING=Растущий
 gadomancy.nodes.STARVING=Голодающий

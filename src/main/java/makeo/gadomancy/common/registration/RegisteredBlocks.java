@@ -3,6 +3,9 @@ package makeo.gadomancy.common.registration;
 import java.util.ArrayList;
 import java.util.List;
 
+import makeo.gadomancy.common.blocks.*;
+import makeo.gadomancy.common.blocks.tiles.*;
+import makeo.gadomancy.common.items.*;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
@@ -11,42 +14,7 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import makeo.gadomancy.api.ClickBehavior;
-import makeo.gadomancy.common.blocks.BlockAdditionalEldritchPortal;
-import makeo.gadomancy.common.blocks.BlockArcaneDropper;
-import makeo.gadomancy.common.blocks.BlockAuraPylon;
-import makeo.gadomancy.common.blocks.BlockEssentiaCompressor;
-import makeo.gadomancy.common.blocks.BlockExtendedNodeJar;
-import makeo.gadomancy.common.blocks.BlockInfusionClaw;
-import makeo.gadomancy.common.blocks.BlockKnowledgeBook;
-import makeo.gadomancy.common.blocks.BlockNode;
-import makeo.gadomancy.common.blocks.BlockNodeManipulator;
-import makeo.gadomancy.common.blocks.BlockRemoteJar;
-import makeo.gadomancy.common.blocks.BlockStickyJar;
-import makeo.gadomancy.common.blocks.BlockStoneMachine;
-import makeo.gadomancy.common.blocks.tiles.TileAdditionalEldritchPortal;
-import makeo.gadomancy.common.blocks.tiles.TileArcaneDropper;
-import makeo.gadomancy.common.blocks.tiles.TileArcanePackager;
-import makeo.gadomancy.common.blocks.tiles.TileAuraPylon;
-import makeo.gadomancy.common.blocks.tiles.TileAuraPylonTop;
-import makeo.gadomancy.common.blocks.tiles.TileBlockProtector;
-import makeo.gadomancy.common.blocks.tiles.TileEssentiaCompressor;
-import makeo.gadomancy.common.blocks.tiles.TileExtendedNode;
-import makeo.gadomancy.common.blocks.tiles.TileExtendedNodeJar;
-import makeo.gadomancy.common.blocks.tiles.TileInfusionClaw;
-import makeo.gadomancy.common.blocks.tiles.TileKnowledgeBook;
-import makeo.gadomancy.common.blocks.tiles.TileManipulationFocus;
-import makeo.gadomancy.common.blocks.tiles.TileManipulatorPillar;
-import makeo.gadomancy.common.blocks.tiles.TileNodeManipulator;
-import makeo.gadomancy.common.blocks.tiles.TileRemoteJar;
-import makeo.gadomancy.common.blocks.tiles.TileStickyJar;
 import makeo.gadomancy.common.data.config.ModConfig;
-import makeo.gadomancy.common.items.ItemBlockAdditionalEldritchPortal;
-import makeo.gadomancy.common.items.ItemBlockAuraPylon;
-import makeo.gadomancy.common.items.ItemBlockEssentiaCompressor;
-import makeo.gadomancy.common.items.ItemBlockKnowledgeBook;
-import makeo.gadomancy.common.items.ItemBlockRemoteJar;
-import makeo.gadomancy.common.items.ItemBlockStoneMachine;
-import makeo.gadomancy.common.items.ItemNodeManipulator;
 import thaumcraft.common.blocks.BlockAiry;
 import thaumcraft.common.config.ConfigBlocks;
 import thaumcraft.common.tiles.TileInfusionMatrix;
@@ -76,7 +44,8 @@ public class RegisteredBlocks {
     public static BlockAdditionalEldritchPortal blockAdditionalEldrichPortal;
     public static BlockAuraPylon blockAuraPylon;
     public static BlockKnowledgeBook blockKnowledgeBook;
-    public static BlockEssentiaCompressor blockEssentiaCompressor;
+	public static BlockEssentiaCompressor blockEssentiaCompressor;
+	public static BlockEssentiaVoidCompressor blockEssentiaVoidCompressor;
 
     public static void init() {
         RegisteredBlocks.registerBlocks();
@@ -110,6 +79,8 @@ public class RegisteredBlocks {
                 .registerBlock(new BlockKnowledgeBook(), ItemBlockKnowledgeBook.class);
         RegisteredBlocks.blockEssentiaCompressor = RegisteredBlocks
                 .registerBlock(new BlockEssentiaCompressor(), ItemBlockEssentiaCompressor.class);
+        RegisteredBlocks.blockEssentiaVoidCompressor = RegisteredBlocks
+                .registerBlock(new BlockEssentiaVoidCompressor(), ItemBlockEssentiaVoidCompressor.class);
     }
 
     private static <T extends Block> T registerBlock(String name, T block) {
@@ -152,6 +123,7 @@ public class RegisteredBlocks {
         RegisteredBlocks.registerTile(TileArcanePackager.class);
         RegisteredBlocks.registerTile(TileKnowledgeBook.class);
         RegisteredBlocks.registerTile(TileEssentiaCompressor.class);
+        RegisteredBlocks.registerTile(TileEssentiaVoidCompressor.class);
         // registerTile(TileAIShutdown.class);
     }
 

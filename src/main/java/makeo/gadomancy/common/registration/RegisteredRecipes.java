@@ -56,8 +56,10 @@ public class RegisteredRecipes {
             .add(Aspect.ENTROPY, 150);
     public static AspectList costsAuraPylonMultiblock = new AspectList().add(Aspect.FIRE, 150).add(Aspect.WATER, 150)
             .add(Aspect.EARTH, 150).add(Aspect.AIR, 150).add(Aspect.ORDER, 150).add(Aspect.ENTROPY, 150);
-    public static AspectList costsCompressorMultiblock = new AspectList().add(Aspect.WATER, 140).add(Aspect.EARTH, 80)
-            .add(Aspect.AIR, 150).add(Aspect.ORDER, 20).add(Aspect.ENTROPY, 140);
+    public static AspectList costsCompressorMultiblock = new AspectList().add(Aspect.WATER, 1).add(Aspect.EARTH, 1)
+            .add(Aspect.AIR, 1).add(Aspect.ORDER, 1).add(Aspect.ENTROPY, 1);
+        public static AspectList costsVoidCompressorMultiblock = new AspectList().add(Aspect.WATER, 1).add(Aspect.EARTH, 1)
+            .add(Aspect.AIR, 1).add(Aspect.ORDER, 1).add(Aspect.ENTROPY, 1);
     // public static AspectList costsAuraCoreStart = new AspectList().add(Aspect.FIRE, 70).add(Aspect.WATER,
     // 70).add(Aspect.EARTH, 70).add(Aspect.AIR, 70).add(Aspect.ORDER, 70).add(Aspect.ENTROPY, 70);
 
@@ -65,6 +67,7 @@ public class RegisteredRecipes {
     public static List multiblockEldritchPortalCreator;
     public static List multiblockAuraPylon;
     public static List multiblockEssentiaCompressor;
+    public static List multiblockEssentiaVoidCompressor;
     public static List[] auraCoreRecipes;
 
     public static InfusionRecipe recipeGolemSilverwood;
@@ -837,6 +840,16 @@ public class RegisteredRecipes {
                         new ItemStack(RegisteredBlocks.blockEssentiaCompressor),
                         new ItemStack(RegisteredBlocks.blockEssentiaCompressor),
                         new ItemStack(RegisteredBlocks.blockEssentiaCompressor)));
+
+        RegisteredRecipes.multiblockEssentiaVoidCompressor = Arrays.asList(
+            RegisteredRecipes.costsVoidCompressorMultiblock,
+            1,
+            3,
+            1,
+            Arrays.asList(
+                new ItemStack(RegisteredBlocks.blockEssentiaVoidCompressor),
+                new ItemStack(RegisteredBlocks.blockEssentiaVoidCompressor),
+                new ItemStack(RegisteredBlocks.blockEssentiaVoidCompressor)));
 
         ItemStack earthCore = new ItemStack(RegisteredItems.itemAuraCore);
         RegisteredItems.itemAuraCore.setCoreType(earthCore, ItemAuraCore.AuraCoreType.EARTH);

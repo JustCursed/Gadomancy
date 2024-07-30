@@ -221,6 +221,7 @@ tile.BlockAuraPylon.0.name=Aura Pylon
 tile.BlockAuraPylon.1.name=Aura Pylon Peak
 tile.BlockKnowledgeBook.name=Book of Knowledge
 tile.BlockEssentiaCompressor.name=Essentia Condenser
+tile.BlockEssentiaVoidCompressor.name= Void essentia Condenser
 
 gadomancy.nodes.GROWING=Growing
 gadomancy.nodes.STARVING=Starving

@@ -1,12 +1,16 @@
 package makeo.gadomancy.common.blocks.tiles;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import makeo.gadomancy.client.events.ClientHandler;
+import makeo.gadomancy.common.network.packets.PacketAnimationAbsorb;
+import makeo.gadomancy.common.registration.RegisteredBlocks;
+import makeo.gadomancy.common.registration.RegisteredItems;
+import makeo.gadomancy.common.utils.ExplosionHelper;
+import makeo.gadomancy.common.utils.Injector;
+import makeo.gadomancy.common.utils.Vector3;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -19,25 +23,11 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
-
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import makeo.gadomancy.client.events.ClientHandler;
-import makeo.gadomancy.common.network.packets.PacketAnimationAbsorb;
-import makeo.gadomancy.common.registration.RegisteredBlocks;
-import makeo.gadomancy.common.registration.RegisteredItems;
-import makeo.gadomancy.common.utils.ExplosionHelper;
-import makeo.gadomancy.common.utils.Injector;
-import makeo.gadomancy.common.utils.Vector3;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.WorldCoordinates;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
-import thaumcraft.api.aspects.IAspectContainer;
 import thaumcraft.api.aspects.IAspectSource;
-import thaumcraft.api.aspects.IEssentiaTransport;
 import thaumcraft.client.fx.ParticleEngine;
 import thaumcraft.client.fx.bolt.FXLightningBolt;
 import thaumcraft.client.fx.particles.FXEssentiaTrail;
@@ -47,23 +37,12 @@ import thaumcraft.common.lib.events.EssentiaHandler;
 import thaumcraft.common.lib.network.PacketHandler;
 import thaumcraft.common.lib.network.fx.PacketFXEssentiaSource;
 import thaumcraft.common.tiles.TilePedestal;
-import thaumicenergistics.api.storage.IAspectStorage;
-import tuhljin.automagy.api.essentia.IAspectContainerWithMax;
-import tuhljin.automagy.api.essentia.IEssentiaLocusReadable;
 
-/**
- * This class is part of the Gadomancy Mod Gadomancy is Open Source and distributed under the GNU LESSER GENERAL PUBLIC
- * LICENSE for more read the LICENSE file
- *
- * Created by HellFirePvP @ 22.04.2016 21:42
- */
-@Optional.InterfaceList({
-        @Optional.Interface(iface = "tuhljin.automagy.api.essentia.IEssentiaLocusReadable", modid = "Automagy"),
-        @Optional.Interface(iface = "tuhljin.automagy.api.essentia.IAspectContainerWithMax", modid = "Automagy"),
-        @Optional.Interface(iface = "thaumicenergistics.api.storage.IAspectStorage", modid = "thaumicenergistics") })
-public class TileEssentiaCompressor extends SynchronizedTileEntity implements IEssentiaTransport,
-        IEssentiaLocusReadable, IAspectContainer, IAspectContainerWithMax, IAspectStorage {
+import java.awt.*;
+import java.util.*;
+import java.util.List;
 
+public class TileEssentiaVoidCompressor extends TileEssentiaCompressor {
     public static final int MAX_SIZE = 8;
     public static final int MAX_ASPECT_STORAGE = 3000, STD_ASPECT_STORAGE = 200;
 
@@ -106,8 +85,8 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
             }
 
             if (this.isMasterTile()
-                    && ((this.incSize < TileEssentiaCompressor.MAX_SIZE && (this.ticksExisted % 40) == 0)
-                            || (this.coordPedestal != null))) {
+                && ((this.incSize < TileEssentiaVoidCompressor.MAX_SIZE && (this.ticksExisted % 40) == 0)
+                || (this.coordPedestal != null))) {
                 this.consumeElements();
             }
         } else {
@@ -135,7 +114,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Optional.Method(modid = "thaumicenergistics")
     public int getContainerCapacity() {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master != null) {
                 return master.currentStorageSize();
             }
@@ -159,34 +138,34 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
             this.consumeTick++;
             if (this.consumeTick <= 400) {
                 PacketAnimationAbsorb absorb = new PacketAnimationAbsorb(
-                        this.xCoord,
-                        this.yCoord + 1,
-                        this.zCoord,
-                        this.coordPedestal.getBlockX(),
-                        this.coordPedestal.getBlockY() + 1,
-                        this.coordPedestal.getBlockZ(),
-                        5,
-                        Block.getIdFromBlock(ConfigBlocks.blockCosmeticSolid),
-                        1);
+                    this.xCoord,
+                    this.yCoord + 1,
+                    this.zCoord,
+                    this.coordPedestal.getBlockX(),
+                    this.coordPedestal.getBlockY() + 1,
+                    this.coordPedestal.getBlockZ(),
+                    5,
+                    Block.getIdFromBlock(ConfigBlocks.blockCosmeticSolid),
+                    1);
                 makeo.gadomancy.common.network.PacketHandler.INSTANCE.sendToAllAround(
-                        absorb,
-                        new NetworkRegistry.TargetPoint(
-                                this.getWorldObj().provider.dimensionId,
-                                this.xCoord,
-                                this.yCoord,
-                                this.zCoord,
-                                16));
+                    absorb,
+                    new NetworkRegistry.TargetPoint(
+                        this.getWorldObj().provider.dimensionId,
+                        this.xCoord,
+                        this.yCoord,
+                        this.zCoord,
+                        16));
             } else {
                 TilePedestal te = (TilePedestal) this.worldObj.getTileEntity(
-                        this.coordPedestal.getBlockX(),
-                        this.coordPedestal.getBlockY(),
-                        this.coordPedestal.getBlockZ());
+                    this.coordPedestal.getBlockX(),
+                    this.coordPedestal.getBlockY(),
+                    this.coordPedestal.getBlockZ());
                 te.setInventorySlotContents(0, null);
                 te.markDirty();
                 this.worldObj.markBlockForUpdate(
-                        this.coordPedestal.getBlockX(),
-                        this.coordPedestal.getBlockY(),
-                        this.coordPedestal.getBlockZ());
+                    this.coordPedestal.getBlockX(),
+                    this.coordPedestal.getBlockY(),
+                    this.coordPedestal.getBlockZ());
                 this.consumeTick = 0;
                 this.coordPedestal = null;
                 this.incSize += 1;
@@ -211,11 +190,11 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
 
     private boolean checkPedestal(Vector3 coordPedestal) {
         Block at = this.worldObj
-                .getBlock(coordPedestal.getBlockX(), coordPedestal.getBlockY(), coordPedestal.getBlockZ());
+            .getBlock(coordPedestal.getBlockX(), coordPedestal.getBlockY(), coordPedestal.getBlockZ());
         int md = this.worldObj
-                .getBlockMetadata(coordPedestal.getBlockX(), coordPedestal.getBlockY(), coordPedestal.getBlockZ());
+            .getBlockMetadata(coordPedestal.getBlockX(), coordPedestal.getBlockY(), coordPedestal.getBlockZ());
         TileEntity te = this.worldObj
-                .getTileEntity(coordPedestal.getBlockX(), coordPedestal.getBlockY(), coordPedestal.getBlockZ());
+            .getTileEntity(coordPedestal.getBlockX(), coordPedestal.getBlockY(), coordPedestal.getBlockZ());
         if (at == null || te == null || md != 1) return false;
         if (!at.equals(RegisteredBlocks.blockStoneMachine) || !(te instanceof TilePedestal)) return false;
         ItemStack st = ((TilePedestal) te).getStackInSlot(0);
@@ -234,17 +213,18 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
                 return true;
             }
         }
-        return false;
+        return true;
     }
 
     // only call from master tile.
     private boolean doDrain(Aspect a, List<WorldCoordinates> coordinates) {
         for (WorldCoordinates coordinate : coordinates) {
             TileEntity sourceTile = this.worldObj.getTileEntity(coordinate.x, coordinate.y, coordinate.z);
-            if (!this.canAccept(a) || !(sourceTile instanceof IAspectSource) || sourceTile instanceof TileEssentiaCompressor) continue;
+            if (!(sourceTile instanceof IAspectSource) || sourceTile instanceof TileEssentiaCompressor) continue;
             IAspectSource as = (IAspectSource) sourceTile;
             AspectList contains = as.getAspects();
             if (contains == null || contains.visSize() > this.al.visSize()) continue;
+
             if (as.takeFromContainer(a, 1)) {
                 PacketHandler.INSTANCE.sendToAllAround(
                     new PacketFXEssentiaSource(
@@ -261,7 +241,8 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
                         this.yCoord + 1,
                         this.zCoord,
                         32.0D));
-                return true;
+
+                return this.canAccept(a);
             }
         }
         return false;
@@ -269,9 +250,9 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
 
     // Only call from master tile.
     private int currentStorageSize() {
-        return TileEssentiaCompressor.STD_ASPECT_STORAGE + this.incSize
-                * ((TileEssentiaCompressor.MAX_ASPECT_STORAGE - TileEssentiaCompressor.STD_ASPECT_STORAGE)
-                        / TileEssentiaCompressor.MAX_SIZE);
+        return TileEssentiaVoidCompressor.STD_ASPECT_STORAGE + this.incSize
+            * ((TileEssentiaVoidCompressor.MAX_ASPECT_STORAGE - TileEssentiaVoidCompressor.STD_ASPECT_STORAGE)
+            / TileEssentiaVoidCompressor.MAX_SIZE);
     }
 
     // Only call from master tile.
@@ -322,16 +303,16 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
         this.cg = Math.min(1.0F, Math.max(0.0F, this.cg));
         this.cb = Math.min(1.0F, Math.max(0.0F, this.cb));
         FXEssentiaTrail essentiaTrail = new FXEssentiaTrail(
-                this.worldObj,
-                this.xCoord + 0.5,
-                this.yCoord + 0.4,
-                this.zCoord + 0.5,
-                this.xCoord + 0.5,
-                this.yCoord + 1.5,
-                this.zCoord + 0.5,
-                count,
-                new Color(this.cr, this.cg, this.cb).getRGB(),
-                0.8F);
+            this.worldObj,
+            this.xCoord + 0.5,
+            this.yCoord + 0.4,
+            this.zCoord + 0.5,
+            this.xCoord + 0.5,
+            this.yCoord + 1.5,
+            this.zCoord + 0.5,
+            count,
+            new Color(this.cr, this.cg, this.cb).getRGB(),
+            0.8F);
         essentiaTrail.noClip = true;
         essentiaTrail.motionY = (0.01F + MathHelper.sin(count / 3.0F) * 0.001F);
         essentiaTrail.motionX = (MathHelper.sin(count / 10.0F) * 0.01F + this.worldObj.rand.nextGaussian() * 0.01D);
@@ -339,16 +320,16 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
         ParticleEngine.instance.addEffect(this.worldObj, essentiaTrail);
 
         essentiaTrail = new FXEssentiaTrail(
-                this.worldObj,
-                this.xCoord + 0.5,
-                this.yCoord + 2.6,
-                this.zCoord + 0.5,
-                this.xCoord + 0.5,
-                this.yCoord + 1.5,
-                this.zCoord + 0.5,
-                count,
-                new Color(this.cr, this.cg, this.cb).getRGB(),
-                0.8F);
+            this.worldObj,
+            this.xCoord + 0.5,
+            this.yCoord + 2.6,
+            this.zCoord + 0.5,
+            this.xCoord + 0.5,
+            this.yCoord + 1.5,
+            this.zCoord + 0.5,
+            count,
+            new Color(this.cr, this.cg, this.cb).getRGB(),
+            0.8F);
         essentiaTrail.noClip = true;
         essentiaTrail.motionY = -(0.01F + MathHelper.sin(count / 3.0F) * 0.001F);
         essentiaTrail.motionX = (MathHelper.sin(count / 10.0F) * 0.01F + this.worldObj.rand.nextGaussian() * 0.01D);
@@ -369,50 +350,50 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
             return new ArrayList<>();
         }
         List<WorldCoordinates> result = teSources.get(thisCoordinates);
-        ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaCompressor.injEssentiaHandler.getField("sources"))
-                .remove(thisCoordinates);
+        ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaVoidCompressor.injEssentiaHandler.getField("sources"))
+            .remove(thisCoordinates);
         return result;
     }
 
     private void searchSources() {
         WorldCoordinates thisCoord = new WorldCoordinates(
-                this.xCoord,
-                this.yCoord,
-                this.zCoord,
-                this.worldObj.provider.dimensionId);
+            this.xCoord,
+            this.yCoord,
+            this.zCoord,
+            this.worldObj.provider.dimensionId);
         List<WorldCoordinates> coords = new LinkedList<>();
         for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
             this.unsafe_search(thisCoord, direction, coords);
         }
 
-        ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaCompressor.injEssentiaHandler.getField("sources"))
-                .put(thisCoord, coords);
+        ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaVoidCompressor.injEssentiaHandler.getField("sources"))
+            .put(thisCoord, coords);
     }
 
     private void unsafe_search(WorldCoordinates coord, ForgeDirection direction, List<WorldCoordinates> out) {
-        ((HashMap<WorldCoordinates, Long>) TileEssentiaCompressor.injEssentiaHandler.getField("sourcesDelay"))
-                .remove(coord);
-        TileEssentiaCompressor.injEssentiaHandler.invokeMethod(
-                "getSources",
-                new Class[] { World.class, WorldCoordinates.class, ForgeDirection.class, int.class },
-                this.worldObj,
-                coord,
-                direction,
-                5);
-        List<WorldCoordinates> coords = ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaCompressor.injEssentiaHandler
-                .getField("sources")).get(coord);
+        ((HashMap<WorldCoordinates, Long>) TileEssentiaVoidCompressor.injEssentiaHandler.getField("sourcesDelay"))
+            .remove(coord);
+        TileEssentiaVoidCompressor.injEssentiaHandler.invokeMethod(
+            "getSources",
+            new Class[] { World.class, WorldCoordinates.class, ForgeDirection.class, int.class },
+            this.worldObj,
+            coord,
+            direction,
+            5);
+        List<WorldCoordinates> coords = ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaVoidCompressor.injEssentiaHandler
+            .getField("sources")).get(coord);
         if (coords != null) {
             out.addAll(
-                    ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaCompressor.injEssentiaHandler
-                            .getField("sources")).get(coord));
-            ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaCompressor.injEssentiaHandler
-                    .getField("sources")).remove(coord);
+                ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaVoidCompressor.injEssentiaHandler
+                    .getField("sources")).get(coord));
+            ((Map<WorldCoordinates, List<WorldCoordinates>>) TileEssentiaVoidCompressor.injEssentiaHandler
+                .getField("sources")).remove(coord);
         }
     }
 
     private void getSourcesField(Map<WorldCoordinates, List<WorldCoordinates>> out) {
         out.clear();
-        out.putAll(TileEssentiaCompressor.injEssentiaHandler.getField("sources"));
+        out.putAll(TileEssentiaVoidCompressor.injEssentiaHandler.getField("sources"));
     }
 
     private void playVortexEffects() {
@@ -427,7 +408,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
             Vec3 v2 = Vec3.createVectorHelper(tx + 0.5D, ty + 0.5D, tz + 0.5D);
 
             MovingObjectPosition mop = ThaumcraftApiHelper
-                    .rayTraceIgnoringSource(this.worldObj, v1, v2, true, false, false);
+                .rayTraceIgnoringSource(this.worldObj, v1, v2, true, false, false);
             if ((mop != null) && (this.getDistanceFrom(mop.blockX, mop.blockY, mop.blockZ) < 16.0D)) {
                 tx = mop.blockX;
                 ty = mop.blockY;
@@ -436,7 +417,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
                 int md = this.worldObj.getBlockMetadata(tx, ty, tz);
                 if (!bi.isAir(this.worldObj, tx, ty, tz)) {
                     Thaumcraft.proxy
-                            .hungryNodeFX(this.worldObj, tx, ty, tz, this.xCoord, this.yCoord + 1, this.zCoord, bi, md);
+                        .hungryNodeFX(this.worldObj, tx, ty, tz, this.xCoord, this.yCoord + 1, this.zCoord, bi, md);
                 }
             }
         }
@@ -458,17 +439,17 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
         double targetY = this.yCoord + 0.4 + (this.worldObj.rand.nextBoolean() ? 2.2 : 0);
         double targetZ = this.zCoord + 0.4 + this.worldObj.rand.nextFloat() * 0.2;
         FXLightningBolt bolt = new FXLightningBolt(
-                Minecraft.getMinecraft().theWorld,
-                originX,
-                originY,
-                originZ,
-                targetX,
-                targetY,
-                targetZ,
-                Minecraft.getMinecraft().theWorld.rand.nextLong(),
-                10,
-                4.0F,
-                5);
+            Minecraft.getMinecraft().theWorld,
+            originX,
+            originY,
+            originZ,
+            targetX,
+            targetY,
+            targetZ,
+            Minecraft.getMinecraft().theWorld.rand.nextLong(),
+            10,
+            4.0F,
+            5);
         bolt.defaultFractal();
         bolt.setType(5);
         bolt.finalizeBolt();
@@ -477,14 +458,14 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     private void vortexEntities() {
         if (this.incSize <= 0) return;
         List entities = this.worldObj.getEntitiesWithinAABB(
-                Entity.class,
-                AxisAlignedBB.getBoundingBox(
-                        this.xCoord - 0.5,
-                        this.yCoord - 0.5,
-                        this.zCoord - 0.5,
-                        this.xCoord + 0.5,
-                        this.yCoord + 0.5,
-                        this.zCoord + 0.5).expand(4, 4, 4));
+            Entity.class,
+            AxisAlignedBB.getBoundingBox(
+                this.xCoord - 0.5,
+                this.yCoord - 0.5,
+                this.zCoord - 0.5,
+                this.xCoord + 0.5,
+                this.yCoord + 0.5,
+                this.zCoord + 0.5).expand(4, 4, 4));
         for (Object o : entities) {
             if (!(o instanceof Entity) || ((Entity) o).isDead) continue;
             this.applyMovementVectors((Entity) o);
@@ -492,7 +473,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     }
 
     private void applyMovementVectors(Entity entity) {
-        double mult = this.incSize * (1D / ((double) TileEssentiaCompressor.MAX_SIZE));
+        double mult = this.incSize * (1D / ((double) TileEssentiaVoidCompressor.MAX_SIZE));
 
         double var3 = (this.xCoord + 0.5D - entity.posX) / 8.0D;
         double var5 = (this.yCoord + 1.5D - entity.posY) / 8.0D;
@@ -516,7 +497,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
                 this.isMultiblockPresent = false;
             }
         } else {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master != null) {
                 if (!master.isMultiblockPresent) {
                     this.breakMultiblock();
@@ -527,14 +508,14 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
         }
     }
 
-    public TileEssentiaCompressor tryFindMasterTile() {
+    public TileEssentiaVoidCompressor tryFindMasterTile() {
         if (!this.isMultiblockFormed()) return null;
         if (this.isMasterTile()) return this; // lul.. check before plz.
         Block down = this.worldObj.getBlock(this.xCoord, this.yCoord - this.multiblockYIndex, this.zCoord);
-        if (!down.equals(RegisteredBlocks.blockEssentiaCompressor)) return null;
+        if (!down.equals(RegisteredBlocks.blockEssentiaVoidCompressor)) return null;
         TileEntity te = this.worldObj.getTileEntity(this.xCoord, this.yCoord - this.multiblockYIndex, this.zCoord);
-        if (!(te instanceof TileEssentiaCompressor)) return null;
-        TileEssentiaCompressor compressor = (TileEssentiaCompressor) te;
+        if (!(te instanceof TileEssentiaVoidCompressor)) return null;
+        TileEssentiaVoidCompressor compressor = (TileEssentiaVoidCompressor) te;
         if (compressor.multiblockId != this.multiblockId || !compressor.isMasterTile()) return null;
         return compressor;
     }
@@ -542,9 +523,9 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     private boolean isMultiblockableBlock(int yOffset) {
         Block block = this.worldObj.getBlock(this.xCoord, this.yCoord + yOffset, this.zCoord);
         TileEntity te = this.worldObj.getTileEntity(this.xCoord, this.yCoord + yOffset, this.zCoord);
-        if (!block.equals(RegisteredBlocks.blockEssentiaCompressor)) return false;
-        if (!(te instanceof TileEssentiaCompressor)) return false;
-        TileEssentiaCompressor compressor = (TileEssentiaCompressor) te;
+        if (!block.equals(RegisteredBlocks.blockEssentiaVoidCompressor)) return false;
+        if (!(te instanceof TileEssentiaVoidCompressor)) return false;
+        TileEssentiaVoidCompressor compressor = (TileEssentiaVoidCompressor) te;
         return compressor.multiblockId == this.multiblockId;
     }
 
@@ -570,8 +551,8 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     }
 
     public static int getAndIncrementNewMultiblockId() {
-        TileEssentiaCompressor.multiblockIDCounter++;
-        return TileEssentiaCompressor.multiblockIDCounter;
+        TileEssentiaVoidCompressor.multiblockIDCounter++;
+        return TileEssentiaVoidCompressor.multiblockIDCounter;
     }
 
     public void setInMultiblock(boolean isMaster, int yIndex, int multiblockId) {
@@ -640,7 +621,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Override
     public AspectList getAspects() {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master != null) {
                 return master.al;
             }
@@ -654,10 +635,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Override
     public boolean doesContainerAccept(Aspect aspect) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = tryFindMasterTile();
-            if (master != null) {
-                return master.canAccept(aspect);
-            }
+            return tryFindMasterTile() != null;
         }
         return false;
     }
@@ -665,23 +643,22 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Override
     public int addToContainer(Aspect aspect, int amount) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
-            if (master == null || !master.canAccept(aspect)) return amount;
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
+            if (master == null) return amount;
             int available = master.currentStorageSize() - master.al.getAmount(aspect);
-            if (available <= 0) return amount;
+            if (available <= 0) return 0;
             int amountToAdd = Math.min(amount, available);
             master.al.add(aspect, amountToAdd);
             this.worldObj.markBlockForUpdate(master.xCoord, master.yCoord, master.zCoord);
             this.markDirty();
-            return amount - amountToAdd;
         }
-        return amount;
+        return 0;
     }
 
     @Override
     public boolean takeFromContainer(Aspect aspect, int i) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master == null) return false;
             boolean couldTake = master.al.reduce(aspect, i);
             master.al.remove(aspect, 0);
@@ -701,7 +678,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Override
     public boolean doesContainerContainAmount(Aspect aspect, int i) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master == null) return false;
             return master.al.getAmount(aspect) >= i;
         }
@@ -717,7 +694,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Override
     public int containerContains(Aspect aspect) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master == null) return 0;
             return master.al.getAmount(aspect);
         }
@@ -733,8 +710,8 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     public boolean canInputFrom(ForgeDirection direction) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) { // The middle one
             return direction == ForgeDirection.SOUTH || direction == ForgeDirection.NORTH
-                    || direction == ForgeDirection.EAST
-                    || direction == ForgeDirection.WEST;
+                || direction == ForgeDirection.EAST
+                || direction == ForgeDirection.WEST;
         }
         return false;
     }
@@ -743,8 +720,8 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     public boolean canOutputTo(ForgeDirection direction) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) { // The middle one
             return direction == ForgeDirection.SOUTH || direction == ForgeDirection.NORTH
-                    || direction == ForgeDirection.EAST
-                    || direction == ForgeDirection.WEST;
+                || direction == ForgeDirection.EAST
+                || direction == ForgeDirection.WEST;
         }
         return false;
     }
@@ -769,7 +746,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     public int takeEssentia(Aspect aspect, int i, ForgeDirection direction) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
             if (!this.canOutputTo(direction)) return 0;
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master == null) return 0;
             int amt = master.al.getAmount(aspect);
             int taken = amt - master.al.remove(aspect, i).getAmount(aspect);
@@ -791,7 +768,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Override
     public Aspect getEssentiaType(ForgeDirection direction) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master == null) return null;
             return new ArrayList<>(master.al.aspects.keySet()).get(this.worldObj.rand.nextInt(master.al.size()));
         }
@@ -801,7 +778,7 @@ public class TileEssentiaCompressor extends SynchronizedTileEntity implements IE
     @Override
     public int getEssentiaAmount(ForgeDirection direction) {
         if (this.isMultiblockFormed() && this.isAccessPoint()) {
-            TileEssentiaCompressor master = this.tryFindMasterTile();
+            TileEssentiaVoidCompressor master = this.tryFindMasterTile();
             if (master == null) return 0;
             return master.al.visSize();
         }
