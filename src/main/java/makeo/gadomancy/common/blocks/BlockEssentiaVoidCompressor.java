@@ -124,7 +124,7 @@ public class BlockEssentiaVoidCompressor extends BlockEssentiaCompressor {
 			if (heldItem != null && heldItem.getItem() instanceof ItemWandCasting
 				&& ResearchManager.isResearchComplete(
 				player.getCommandSenderName(),
-				SimpleResearchItem.getFullName("ESSENTIA_COMPRESSOR"))) {
+				SimpleResearchItem.getFullName("ESSENTIA_VOID_COMPRESSOR"))) {
 				ChunkCoordinates lowest = this.findLowestCompressorBlock(world, x, y, z);
 				boolean canForm = lowest != null && this.isMuliblockPossible(world, lowest);
 				if (canForm && ThaumcraftApiHelper.consumeVisFromWandCrafting(

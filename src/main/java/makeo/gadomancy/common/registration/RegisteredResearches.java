@@ -88,6 +88,9 @@ public class RegisteredResearches {
     public static ResearchItem researchFamiliarAugmentSpeed;
     public static ResearchItem researchFamiliarAugmentRange;
 
+    //Void Condenser
+    public static ResearchItem researchEssentiaVoidCompressor;
+
     public static void init() {
 
         ResearchCategories.registerCategory(
@@ -618,6 +621,26 @@ public class RegisteredResearches {
                                         new ResearchPage("gadomancy.research_page.ESSENTIA_COMPRESSOR.8"),
                                         new ResearchPage("gadomancy.research_page.ESSENTIA_COMPRESSOR.9"))
                                 .registerResearchItem();
+        RegisteredResearches.researchEssentiaVoidCompressor = new SimpleResearchItem(
+                "ESSENTIA_VOID_COMPRESSOR",
+                -8,
+                6,
+                2,
+                new ItemStack(RegisteredBlocks.blockEssentiaVoidCompressor),
+                new AspectList().add(Aspect.VOID, 12).add(Aspect.WATER, 10).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 6)
+                        .add(Aspect.MECHANISM, 12)).setSecondary()
+                .setParents(RegisteredResearches.researchEssentiaCompressor.key)
+                .setItemTriggers(
+                        new ItemStack(
+                                RegisteredItems.itemAuraCore,
+                                1,
+                                ItemAuraCore.AuraCoreType.WATER.ordinal()))
+                .setPages(
+                        new ResearchPage("gadomancy.research_page.ESSENTIA_VOID_COMPRESSOR.1"),
+                        new ResearchPage(RegisteredRecipes.recipeEssentiaVoidCompressor),
+                        new ResearchPage(RegisteredRecipes.multiblockEssentiaCompressor))
+
+                .registerResearchItem();
 
         /*
          * researchAiShutdown = new SimpleResearchItem("AI_SHUTDOWN", -3, 5, 2, new

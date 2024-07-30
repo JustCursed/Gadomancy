@@ -64,8 +64,8 @@ import tuhljin.automagy.api.essentia.IEssentiaLocusReadable;
 public class TileEssentiaCompressor extends SynchronizedTileEntity implements IEssentiaTransport,
         IEssentiaLocusReadable, IAspectContainer, IAspectContainerWithMax, IAspectStorage {
 
-    public static final int MAX_SIZE = 8;
-    public static final int MAX_ASPECT_STORAGE = 3000, STD_ASPECT_STORAGE = 200;
+    public static final int MAX_SIZE = 24;
+    public static final int MAX_ASPECT_STORAGE = 30000, STD_ASPECT_STORAGE = 200;
 
     private static Injector injEssentiaHandler = new Injector(EssentiaHandler.class);
     private static int multiblockIDCounter;

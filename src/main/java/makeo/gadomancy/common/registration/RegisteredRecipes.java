@@ -109,6 +109,7 @@ public class RegisteredRecipes {
     public static IArcaneRecipe recipeArcanePackager;
     public static IArcaneRecipe recipeKnowledgeBook;
     public static IArcaneRecipe recipeEssentiaCompressor;
+    public static IArcaneRecipe recipeEssentiaVoidCompressor;
 
     public static InfusionEnchantmentRecipe recipeRevealer;
 
@@ -811,7 +812,8 @@ public class RegisteredRecipes {
 
         ItemStack waterCore = new ItemStack(RegisteredItems.itemAuraCore);
         RegisteredItems.itemAuraCore.setCoreType(waterCore, ItemAuraCore.AuraCoreType.WATER);
-
+        ItemStack entropyCore = new ItemStack(RegisteredItems.itemAuraCore);
+        RegisteredItems.itemAuraCore.setCoreType(entropyCore, ItemAuraCore.AuraCoreType.ENTROPY);
         RegisteredRecipes.recipeEssentiaCompressor = ThaumcraftApi.addArcaneCraftingRecipe(
                 Gadomancy.MODID.toUpperCase() + ".ESSENTIA_COMPRESSOR",
                 new ItemStack(RegisteredBlocks.blockEssentiaCompressor, 3),
@@ -830,6 +832,22 @@ public class RegisteredRecipes {
                 new ItemStack(RegisteredItems.itemElement, 1, ItemElement.EnumElementType.DARKNESS.ordinal()),
                 'C',
                 waterCore);
+        RegisteredRecipes.recipeEssentiaVoidCompressor = ThaumcraftApi.addArcaneCraftingRecipe(
+                Gadomancy.MODID.toUpperCase() + ".ESSENTIA_VOID_COMPRESSOR",
+                new ItemStack(RegisteredBlocks.blockEssentiaVoidCompressor, 3),
+                new AspectList().add(Aspect.WATER, 490).add(Aspect.ORDER, 450).add(Aspect.ENTROPY, 420)
+                        .add(Aspect.FIRE, 400).add(Aspect.AIR, 460).add(Aspect.EARTH, 360),
+                "RER",
+                "TET",
+                "LEL",
+                'L',
+                new ItemStack(ConfigBlocks.blockJar),
+                'R',
+                new ItemStack(ConfigBlocks.blockMirror),
+                'E',
+                new ItemStack(RegisteredBlocks.blockEssentiaCompressor),
+                'T',
+                entropyCore);
 
         RegisteredRecipes.multiblockEssentiaCompressor = Arrays.asList(
                 RegisteredRecipes.costsCompressorMultiblock,

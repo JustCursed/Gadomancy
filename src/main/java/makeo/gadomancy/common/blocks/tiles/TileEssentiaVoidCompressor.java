@@ -43,8 +43,8 @@ import java.util.*;
 import java.util.List;
 
 public class TileEssentiaVoidCompressor extends TileEssentiaCompressor {
-    public static final int MAX_SIZE = 8;
-    public static final int MAX_ASPECT_STORAGE = 3000, STD_ASPECT_STORAGE = 200;
+    public static final int MAX_SIZE = 23;
+    public static final int MAX_ASPECT_STORAGE = 30000, STD_ASPECT_STORAGE = 1250;
 
     private static Injector injEssentiaHandler = new Injector(EssentiaHandler.class);
     private static int multiblockIDCounter;
@@ -129,6 +129,7 @@ public class TileEssentiaVoidCompressor extends TileEssentiaCompressor {
     }
 
     private void consumeElements() {
+
         if (this.coordPedestal != null) {
             if (!this.checkPedestal(this.coordPedestal)) {
                 this.consumeTick = 0;
@@ -136,7 +137,8 @@ public class TileEssentiaVoidCompressor extends TileEssentiaCompressor {
                 return;
             }
             this.consumeTick++;
-            if (this.consumeTick <= 400) {
+            if (this.consumeTick < 300) {
+
                 PacketAnimationAbsorb absorb = new PacketAnimationAbsorb(
                     this.xCoord,
                     this.yCoord + 1,
